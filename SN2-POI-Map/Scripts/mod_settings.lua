@@ -18,7 +18,7 @@ local function writeManifest()
 return {
     name = "SN2-POI-Map",
     display = "SN2-POI-Map",
-    version = "1.0.0",
+    version = "1.0.1",
     github = "SPaladinoMods/SN2-POI-Map",
     settings = {
         {
@@ -49,7 +49,7 @@ return {
             description = "Chooses which corner of the screen the minimap uses.",
             type = "rotator",
             options = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" },
-            default = "TopLeft",
+            default = "BottomRight",
         },
         {
             key = "FogOfWarEnabled",
@@ -130,7 +130,7 @@ return {
             description = "Changes the player's arrow marker color.",
             type = "rotator",
             options = { "White", "Cyan", "Blue", "Green", "Yellow", "Orange", "Red", "Purple", "Pink" },
-            default = "Orange",
+            default = "Green",
         },
         {
             key = "ShowOtherPlayers",

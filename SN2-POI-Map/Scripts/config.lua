@@ -77,7 +77,7 @@ local Config = {
         -- Minimap refresh interval (ms)
         UpdateIntervalMs = 500,
         -- Screen anchor for the minimap ("TopRight", "TopLeft", "BottomRight", "BottomLeft", "Center")
-        Anchor = "TopLeft",
+        Anchor = "BottomRight",
         -- Fixed minimap width in pixels (height adapts to the image aspect ratio)
         Width = 360,
         -- Zoom factor: 1.0 = whole map fits the box; higher = magnified and follows the player
@@ -129,7 +129,7 @@ local Config = {
         -- Marker size in pixels
         Size = 12,
         -- Named color preset used by the in-game settings menu
-        ColorPreset = "Orange",
+        ColorPreset = "Green",
         -- Pixel movement threshold before redrawing the marker (avoids micro-updates)
         MoveThresholdPixels = 4,
         -- Rotation threshold in degrees before redrawing the marker heading
@@ -137,7 +137,7 @@ local Config = {
         -- Movement threshold in UE units before the player is considered to have moved
         WorldMoveThreshold = 150.0,
         -- Marker color (R, G, B, A; default orange tint)
-        Color = { R = 0.94117647, G = 0.51372549, B = 0.22745098, A = 1.0 },
+        Color = { R = 0.22745098, G = 0.75294118, B = 0.29019608, A = 1.0 },
     },
 
     Multiplayer = {

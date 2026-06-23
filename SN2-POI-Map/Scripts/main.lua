@@ -224,11 +224,11 @@ function normalizeMinimapAnchor(value)
     if value == "TopLeft" or value == "TopRight" or value == "BottomLeft" or value == "BottomRight" or value == "Center" then
         return value
     end
-    return "TopLeft"
+    return "BottomRight"
 end
 
 function applyMarkerColorPreset(presetName)
-    local safeName = type(presetName) == "string" and presetName or "Orange"
+    local safeName = type(presetName) == "string" and presetName or "Green"
     local preset = { R = 0.0, G = 0.9, B = 1.0, A = 1.0 }
     if safeName == "White" then
         preset = { R = 1.0, G = 1.0, B = 1.0, A = 1.0 }
@@ -247,7 +247,7 @@ function applyMarkerColorPreset(presetName)
     elseif safeName == "Pink" then
         preset = { R = 1.0, G = 0.45, B = 0.78, A = 1.0 }
     else
-        safeName = "Orange"
+        safeName = "Green"
     end
     Config.Marker.ColorPreset = safeName
     Config.Marker.Color = Config.Marker.Color or {}
@@ -262,7 +262,7 @@ function applyMarkerColorPreset(presetName)
     overlay.lastMarkerColorKey = nil
 end
 
-applyMarkerColorPreset((Config.Marker or {}).ColorPreset or "Orange")
+applyMarkerColorPreset((Config.Marker or {}).ColorPreset or "Green")
 
 local lastWorldX = nil
 local lastWorldY = nil
@@ -3653,7 +3653,7 @@ local function applyBasicModSettings()
         log("Setting applied: Marker.Size = " .. tostring(value), "Verbose")
     end
 
-    value = getSharedSetting("MarkerColorPreset", Config.Marker.ColorPreset or "Orange")
+    value = getSharedSetting("MarkerColorPreset", Config.Marker.ColorPreset or "Green")
     if Config.Marker.ColorPreset ~= value then
         applyMarkerColorPreset(value)
         changed = true
