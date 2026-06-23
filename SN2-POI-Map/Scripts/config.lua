@@ -38,6 +38,17 @@ local Config = {
     -- Key debounce time to prevent double presses (ms)
     KeyDebounceMs = 600,
 
+    Localization = {
+        -- "auto" follows the game's active language. Use a culture code like "fr" or "pt-BR" to force one.
+        Language = "auto",
+        -- Delay before re-checking the language after the mod first loads.
+        StartupRefreshDelayMs = 3000,
+        -- Delay before re-checking the language after ApplySettings fires.
+        ApplySettingsRefreshDelayMs = 750,
+        -- Periodic language polling interval so manifest rewrites do not depend only on one UI hook.
+        PollIntervalMs = 1000,
+    },
+
     Map = {
         ImageFile = "subnautica2_world_base.jpg",
         ImageWidth = 10423,

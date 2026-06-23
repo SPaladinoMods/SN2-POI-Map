@@ -3,7 +3,6 @@
   "font": "Montserrat-SemiBold.ttf",
   "font_size": 20,
   "column": {
-    "file": "category_labels.png",
     "width": 194,
     "height": 568,
     "row_height": 28,
@@ -17,115 +16,67 @@
   "labels": [
     {
       "category_id": 0,
-      "title": "All",
-      "file": "0_all.png",
-      "width": 44,
-      "height": 25
+      "title": "All"
     },
     {
       "category_id": 15593,
-      "title": "Point of Interest",
-      "file": "15593_point_of_interest.png",
-      "width": 183,
-      "height": 27
+      "title": "Point of Interest"
     },
     {
       "category_id": 15597,
-      "title": "Wreck",
-      "file": "15597_wreck.png",
-      "width": 83,
-      "height": 26
+      "title": "Wreck"
     },
     {
       "category_id": 15598,
-      "title": "Lifepod",
-      "file": "15598_lifepod.png",
-      "width": 94,
-      "height": 30
+      "title": "Lifepod"
     },
     {
       "category_id": 15599,
-      "title": "Abandoned Base",
-      "file": "15599_abandoned_base.png",
-      "width": 194,
-      "height": 26
+      "title": "Abandoned Base"
     },
     {
       "category_id": 15607,
-      "title": "Leviathan",
-      "file": "15607_leviathan.png",
-      "width": 118,
-      "height": 27
+      "title": "Leviathan"
     },
     {
       "category_id": 15610,
-      "title": "Fragment",
-      "file": "15610_fragment.png",
-      "width": 118,
-      "height": 29
+      "title": "Fragment"
     },
     {
       "category_id": 15611,
-      "title": "Data Box",
-      "file": "15611_data_box.png",
-      "width": 110,
-      "height": 25
+      "title": "Data Box"
     },
     {
       "category_id": 15614,
-      "title": "Equipment",
-      "file": "15614_equipment.png",
-      "width": 132,
-      "height": 30
+      "title": "Equipment"
     },
     {
       "category_id": 15617,
-      "title": "Electronics",
-      "file": "15617_electronics.png",
-      "width": 130,
-      "height": 27
+      "title": "Electronics"
     },
     {
       "category_id": 15620,
-      "title": "Data Terminal",
-      "file": "15620_data_terminal.png",
-      "width": 161,
-      "height": 27
+      "title": "Data Terminal"
     },
     {
       "category_id": 15622,
-      "title": "Easter Egg",
-      "file": "15622_easter_egg.png",
-      "width": 127,
-      "height": 29
+      "title": "Easter Egg"
     },
     {
       "category_id": 15623,
-      "title": "Databank Entry",
-      "file": "15623_databank_entry.png",
-      "width": 179,
-      "height": 30
+      "title": "Databank Entry"
     },
     {
       "category_id": 15624,
-      "title": "Adaptation",
-      "file": "15624_adaptation.png",
-      "width": 133,
-      "height": 30
+      "title": "Adaptation"
     },
     {
       "category_id": 15626,
-      "title": "Blackbox",
-      "file": "15626_blackbox.png",
-      "width": 112,
-      "height": 26
+      "title": "Blackbox"
     },
     {
       "category_id": 15663,
-      "title": "Supply Crate",
-      "file": "15663_supply_crate.png",
-      "width": 147,
-      "height": 30
+      "title": "Supply Crate"
     }
   ]
 }

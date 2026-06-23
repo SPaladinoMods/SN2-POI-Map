@@ -1,6 +1,7 @@
 local UEHelpers = require("UEHelpers")
 local Config = require("config")
 local Json = require("json")
+_G.SN2POILang = _G.SN2POILang or require("lang")
 -- Writes the optional SN2ModSettings registration when that mod is installed.
 pcall(require, "mod_settings")
 
@@ -42,8 +43,6 @@ local poiIconManifestById = {}
 local poiLabelManifestById = {}
 local poiLabelColumnInfo = nil
 local poiDataLoadAttempted = false
-local poiLabelColumnTexture = CreateInvalidObject()
-local poiLabelColumnTextureAttempted = false
 
 -- Shared POI icon sizing for all category markers.
 local POI_ICON_SCALE = 4.0
@@ -140,10 +139,15 @@ local overlay = {
     poiMarkerSlotsByCategoryId = {},
     poiAllRow = CreateInvalidObject(),
     poiAllRowSlot = nil,
+    poiAllLabel = CreateInvalidObject(),
+    poiAllLabelSlot = nil,
     poiRowsByCategoryId = {},
     poiRowSlotsByCategoryId = {},
+    poiLabelsByCategoryId = {},
+    poiLabelSlotsByCategoryId = {},
     poiLabelColumn = CreateInvalidObject(),
     poiLabelColumnSlot = nil,
+    poiLabelFont = nil,
     lastCanvasVisible = nil,
     lastDimVisible = nil,
     lastMarkerVisible = nil,
@@ -364,8 +368,12 @@ local function clearOverlayWidgetRefs(clearOwner)
     overlay.poiMarkerSlotsByCategoryId = {}
     overlay.poiAllRow = CreateInvalidObject()
     overlay.poiAllRowSlot = nil
+    overlay.poiAllLabel = CreateInvalidObject()
+    overlay.poiAllLabelSlot = nil
     overlay.poiRowsByCategoryId = {}
     overlay.poiRowSlotsByCategoryId = {}
+    overlay.poiLabelsByCategoryId = {}
+    overlay.poiLabelSlotsByCategoryId = {}
     overlay.poiLabelColumn = CreateInvalidObject()
     overlay.poiLabelColumnSlot = nil
     poiAllRowVisibleState = nil
@@ -1073,7 +1081,7 @@ local function loadTexture(fileName, attemptedFlagName)
     local renderer = getRenderingLibrary()
     if not world:IsValid() or not renderer:IsValid() then return target end
 
-    local path = getAssetPath(fileName)
+    local path = SN2POILang.resolveAssetPath(fileName)
     if not fileExists(path) then
         log("Texture not found: " .. path)
         if attemptedFlagName == "map" then
@@ -1126,7 +1134,7 @@ local function loadArrowTexture()
 end
 
 local function readTextAsset(fileName, label)
-    local path = getAssetPath(fileName)
+    local path = SN2POILang.resolveAssetPath(fileName)
     local file = io.open(path, "rb")
     if not file then
         log(label .. " file not found: " .. path)
@@ -1341,6 +1349,80 @@ local function createImage(parent, outer, zOrder, texture, tint)
     return image, slot
 end
 
+function getSlateTextColor(value)
+    value = value or COLOR_WHITE
+    return {
+        SpecifiedColor = {
+            R = value.R or 1.0,
+            G = value.G or 1.0,
+            B = value.B or 1.0,
+            A = value.A or 1.0,
+        },
+        ColorUseRule = 0,
+    }
+end
+
+function applyTextBlockText(widget, text)
+    if not widget or not widget:IsValid() then return end
+    safeCall("SetText", function()
+        widget:SetText(FText(tostring(text or "")))
+    end)
+end
+
+function getPoiPanelFont()
+    if overlay.poiLabelFont and overlay.poiLabelFont.FontObject then
+        return overlay.poiLabelFont
+    end
+
+    safeCall("CapturePOILabelFont", function()
+        local allTextBlocks = FindAllOf("TextBlock")
+        for _, textBlock in ipairs(allTextBlocks or {}) do
+            if textBlock and textBlock:IsValid() and textBlock.Font then
+                overlay.poiLabelFont = textBlock.Font
+                break
+            end
+        end
+    end)
+
+    return overlay.poiLabelFont
+end
+
+function applyPoiLabelTextStyle(widget, fontSize, color)
+    if not widget or not widget:IsValid() then return end
+
+    safeCall("SetLabelTextColor", function()
+        widget:SetColorAndOpacity(getSlateTextColor(color or COLOR_WHITE))
+    end)
+
+    safeCall("SetLabelShadow", function()
+        widget:SetShadowOffset({ X = 1, Y = 1 })
+        widget:SetShadowColorAndOpacity({ SpecifiedColor = { R = 0.0, G = 0.0, B = 0.0, A = 0.8 }, ColorUseRule = 0 })
+    end)
+
+    local baseFont = getPoiPanelFont()
+    if baseFont and baseFont.FontObject then
+        safeCall("SetLabelFont", function()
+            local font = widget.Font
+            font.FontObject = baseFont.FontObject
+            font.TypefaceFontName = baseFont.TypefaceFontName
+            font.Size = fontSize or baseFont.Size or 20
+            widget:SetFont(font)
+        end)
+    end
+end
+
+function createText(parent, outer, zOrder, text, color, fontSize)
+    local widget = constructWidget("TextBlock", outer or parent)
+    if not widget:IsValid() then return CreateInvalidObject(), nil end
+
+    local slot = addToCanvas(parent, widget)
+    if slot and slot:IsValid() then slot:SetZOrder(zOrder or 0) end
+    applyTextBlockText(widget, text)
+    applyPoiLabelTextStyle(widget, fontSize or 20, color or COLOR_WHITE)
+    widget:SetVisibility(VISIBLE)
+    return widget, slot
+end
+
 local function setSlotAnchors(slot, minX, minY, maxX, maxY, zOrder)
     if not slot or not slot:IsValid() then return end
     slot:SetMinimum(vec2(minX, minY))
@@ -1363,6 +1445,15 @@ end
 
 local function setSlotTopLeft(slot, zOrder)
     setSlotAnchors(slot, 0.0, 0.0, 0.0, 0.0, zOrder)
+end
+
+function setSlotAutoSizePosition(slot, x, y, zOrder)
+    if not slot or not slot:IsValid() then return end
+    setSlotTopLeft(slot, zOrder)
+    slot:SetPosition(vec2(x or 0.0, y or 0.0))
+    slot:SetSize(vec2(0.0, 0.0))
+    slot:SetAlignment(vec2(0.0, 0.0))
+    slot:SetAutoSize(true)
 end
 
 local setSlotRect
@@ -1389,6 +1480,9 @@ local function loadPoiLabelManifest()
 
     local manifest = loadJsonAsset("labels\\label_manifest.json", "POI label manifest")
     poiLabelColumnInfo = manifest and manifest.column or nil
+    if poiLabelColumnInfo and manifest and manifest.font_size and poiLabelColumnInfo.font_size == nil then
+        poiLabelColumnInfo.font_size = manifest.font_size
+    end
     local labels = manifest and manifest.labels or {}
     for _, label in ipairs(labels) do
         local categoryId = tonumber(label.category_id)
@@ -1401,17 +1495,16 @@ local function loadPoiLabelManifest()
     return poiLabelManifestById
 end
 
-local function normalizePoiCategory(rawCategory, iconById, labelById)
+local function normalizePoiCategory(rawCategory, iconById)
     local categoryId = tonumber(rawCategory.category_id)
     if not categoryId then return nil end
 
     local iconInfo = iconById[categoryId] or {}
     local iconFile = normalizeAssetFileName(iconInfo.file or rawCategory.file)
     local iconPath = iconFile and joinPath("icons", iconFile) or nil
-    local labelInfo = labelById[categoryId] or {}
     local defaultEnabled = rawCategory.default_enabled
     if defaultEnabled == nil then
-        defaultEnabled = categoryId == 15598 or rawCategory.title == "Lifepod"
+        defaultEnabled = categoryId == 15598
     else
         defaultEnabled = defaultEnabled == true
     end
@@ -1420,15 +1513,11 @@ local function normalizePoiCategory(rawCategory, iconById, labelById)
         id = categoryId,
         categoryId = categoryId,
         key = tostring(categoryId),
-        title = rawCategory.title or iconInfo.title or tostring(categoryId),
+        title = SN2POILang.lookup("poi_category_" .. tostring(categoryId), rawCategory.title or iconInfo.title or tostring(categoryId)),
         icon = rawCategory.icon or iconInfo.icon or "",
         groupId = tonumber(rawCategory.group_id),
         expectedCount = tonumber(rawCategory.count),
         iconPath = iconPath,
-        iconWidth = tonumber(iconInfo.width),
-        iconHeight = tonumber(iconInfo.height),
-        labelWidth = tonumber(labelInfo.width),
-        labelHeight = tonumber(labelInfo.height),
         defaultEnabled = defaultEnabled,
         visible = defaultEnabled,
         texture = CreateInvalidObject(),
@@ -1458,9 +1547,9 @@ local function loadPoiData()
     end
 
     local iconById = loadPoiIconManifest()
-    local labelById = loadPoiLabelManifest()
+    loadPoiLabelManifest()
     for _, rawCategory in ipairs(config.categories) do
-        local category = normalizePoiCategory(rawCategory, iconById, labelById)
+        local category = normalizePoiCategory(rawCategory, iconById)
         if category then
             poiCategories[#poiCategories + 1] = category
             poiCategoriesById[category.id] = category
@@ -1522,7 +1611,7 @@ local function loadPoiCategoryTexture(category)
     local renderer = getRenderingLibrary()
     if not world:IsValid() or not renderer:IsValid() then return category.texture end
 
-    local path = getAssetPath(category.iconPath)
+    local path = SN2POILang.resolveAssetPath(category.iconPath)
     if not fileExists(path) then
         category.textureAttempted = true
         log("POI icon texture not found for " .. category.title .. ": " .. path)
@@ -1559,46 +1648,6 @@ local function applyPoiCategoryTexture(category)
     end
 
     category.textureApplied = true
-end
-
-local function loadPoiLabelColumnTexture()
-    if poiLabelColumnTexture and poiLabelColumnTexture:IsValid() then return poiLabelColumnTexture end
-    if poiLabelColumnTextureAttempted then return poiLabelColumnTexture end
-
-    local columnInfo = poiLabelColumnInfo
-    local fileName = columnInfo and normalizeAssetFileName(columnInfo.file) or nil
-    if not fileName then
-        poiLabelColumnTextureAttempted = true
-        log("POI label column file missing from manifest")
-        return poiLabelColumnTexture
-    end
-
-    local world = UEHelpers.GetWorld()
-    local renderer = getRenderingLibrary()
-    if not world:IsValid() or not renderer:IsValid() then return poiLabelColumnTexture end
-
-    local labelPath = joinPath("labels", fileName)
-    local path = getAssetPath(labelPath)
-    if not fileExists(path) then
-        poiLabelColumnTextureAttempted = true
-        log("POI label column texture not found: " .. path)
-        return poiLabelColumnTexture
-    end
-
-    poiLabelColumnTextureAttempted = true
-    local texture = safeCall("ImportPOILabelColumnTexture", function()
-        return renderer:ImportFileAsTexture2D(world, path)
-    end)
-
-    if texture and texture:IsValid() then
-        poiLabelColumnTexture = texture
-        log("POI label column texture loaded: " .. path)
-    else
-        poiLabelColumnTexture = CreateInvalidObject()
-        log("WARNING: POI label column texture invalid: " .. path)
-    end
-
-    return poiLabelColumnTexture
 end
 
 local function createPoiCategoryMarkers(category, widgetOuter)
@@ -1779,10 +1828,15 @@ end
 local function createPoiCategoryRows(widgetOuter, pixel)
     overlay.poiRowsByCategoryId = {}
     overlay.poiRowSlotsByCategoryId = {}
+    overlay.poiLabelsByCategoryId = {}
+    overlay.poiLabelSlotsByCategoryId = {}
     overlay.poiAllRow = CreateInvalidObject()
     overlay.poiAllRowSlot = nil
+    overlay.poiAllLabel = CreateInvalidObject()
+    overlay.poiAllLabelSlot = nil
     overlay.poiLabelColumn = CreateInvalidObject()
     overlay.poiLabelColumnSlot = nil
+    local fontSize = tonumber((poiLabelColumnInfo or {}).font_size) or 20
 
     overlay.poiAllRow, overlay.poiAllRowSlot = createImage(
         overlay.canvas,
@@ -1793,6 +1847,23 @@ local function createPoiCategoryRows(widgetOuter, pixel)
     )
     setSlotTopLeft(overlay.poiAllRowSlot, 1002)
     setWidgetVisibility(overlay.poiAllRow, false)
+
+    overlay.poiLabelColumn = constructWidget("CanvasPanel", widgetOuter or overlay.canvas)
+    if overlay.poiLabelColumn:IsValid() then
+        overlay.poiLabelColumnSlot = addToCanvas(overlay.canvas, overlay.poiLabelColumn)
+        if overlay.poiLabelColumnSlot and overlay.poiLabelColumnSlot:IsValid() then
+            overlay.poiLabelColumnSlot:SetZOrder(1002)
+        end
+        setWidgetVisibility(overlay.poiLabelColumn, false)
+        overlay.poiAllLabel, overlay.poiAllLabelSlot = createText(
+            overlay.poiLabelColumn,
+            widgetOuter,
+            1002,
+            SN2POILang.lookup("poi_category_all", "All"),
+            COLOR_WHITE,
+            fontSize
+        )
+    end
 
     for _, category in ipairs(loadPoiData()) do
         local row, slot = createImage(
@@ -1806,14 +1877,19 @@ local function createPoiCategoryRows(widgetOuter, pixel)
         setWidgetVisibility(row, false)
         overlay.poiRowsByCategoryId[category.id] = row
         overlay.poiRowSlotsByCategoryId[category.id] = slot
+        if overlay.poiLabelColumn and overlay.poiLabelColumn:IsValid() then
+            local label, labelSlot = createText(
+                overlay.poiLabelColumn,
+                widgetOuter,
+                1002,
+                category.title,
+                COLOR_WHITE,
+                fontSize
+            )
+            overlay.poiLabelsByCategoryId[category.id] = label
+            overlay.poiLabelSlotsByCategoryId[category.id] = labelSlot
+        end
         category.rowVisibleState = nil
-    end
-
-    local labelTexture = loadPoiLabelColumnTexture()
-    if labelTexture and labelTexture:IsValid() then
-        overlay.poiLabelColumn, overlay.poiLabelColumnSlot = createImage(overlay.canvas, widgetOuter, 1002, labelTexture, COLOR_WHITE)
-        setSlotTopLeft(overlay.poiLabelColumnSlot, 1002)
-        setWidgetVisibility(overlay.poiLabelColumn, false)
     end
 end
 
@@ -1848,24 +1924,32 @@ local function updatePoiPanelRows(layoutChanged)
         local chipSize = 22
         local labelGap = 10
         local columnInfo = poiLabelColumnInfo or {}
+        local fontSize = tonumber(columnInfo.font_size) or 20
         rowH = tonumber(columnInfo.row_height) or rowH
         rowGap = tonumber(columnInfo.row_gap) or rowGap
-        local labelW = tonumber(columnInfo.width) or 0
+        local labelW = math.max(tonumber(columnInfo.width) or 0, 260)
         local rowCount = #categories + 1
         local labelH = tonumber(columnInfo.height) or ((rowCount * rowH) + (math.max(0, rowCount - 1) * rowGap))
-        local panelW = math.max(300, 16 + chipSize + labelGap + labelW + 16)
+        local panelW = math.max(380, 16 + chipSize + labelGap + labelW + 16)
         local panelH = 32 + math.max(labelH, (rowCount * rowH) + (math.max(0, rowCount - 1) * rowGap))
         local rowX = panelX + 16
         local rowY = panelY + 16
+        local textOffsetY = math.max(0, math.floor((rowH - fontSize) / 2) - 1)
 
         setSlotRect(overlay.poiPanelSlot, panelX, panelY, panelW, panelH, 1001)
         setSlotRect(overlay.poiLabelColumnSlot, rowX + chipSize + labelGap, rowY, labelW, labelH, 1002)
         setSlotRect(overlay.poiAllRowSlot, rowX, rowY + math.floor((rowH - chipSize) / 2), chipSize, chipSize, 1002)
+        setSlotAutoSizePosition(overlay.poiAllLabelSlot, 0, textOffsetY, 1002)
+        applyPoiLabelTextStyle(overlay.poiAllLabel, fontSize, COLOR_WHITE)
+        applyTextBlockText(overlay.poiAllLabel, SN2POILang.lookup("poi_category_all", "All"))
         poiAllRowHitRect = { X = rowX, Y = rowY, Width = panelW - 32, Height = rowH }
         for index, category in ipairs(categories) do
             local y = rowY + ((rowH + rowGap) * index)
             local slot = overlay.poiRowSlotsByCategoryId[category.id]
             setSlotRect(slot, rowX, y + math.floor((rowH - chipSize) / 2), chipSize, chipSize, 1002)
+            setSlotAutoSizePosition(overlay.poiLabelSlotsByCategoryId[category.id], 0, (rowH + rowGap) * index + textOffsetY, 1002)
+            applyPoiLabelTextStyle(overlay.poiLabelsByCategoryId[category.id], fontSize, COLOR_WHITE)
+            applyTextBlockText(overlay.poiLabelsByCategoryId[category.id], category.title)
             category.rowHitRect = { X = rowX, Y = y, Width = panelW - 32, Height = rowH }
         end
     end
@@ -3074,8 +3158,6 @@ local function resetOverlay()
     pixelTexture = CreateInvalidObject()
     arrowTexture = CreateInvalidObject()
     fogTexture = CreateInvalidObject()
-    poiLabelColumnTexture = CreateInvalidObject()
-    poiLabelColumnTextureAttempted = false
     if poiCategories then
         for _, category in ipairs(poiCategories) do
             category.texture = CreateInvalidObject()
@@ -3539,6 +3621,22 @@ if isFogEnabled() then
     fogRuntime.reloadForCurrentSave()
 end
 
+SN2POILang.addRefreshListener(function()
+    ExecuteInGameThread(function()
+        log("Localization refresh applied: " .. tostring(SN2POILang.getResolvedCultureCode()))
+        poiCategories = nil
+        poiCategoriesById = {}
+        poiPointsByCategoryId = {}
+        poiIconManifestById = {}
+        poiLabelManifestById = {}
+        poiLabelColumnInfo = nil
+        poiDataLoadAttempted = false
+        resetOverlay()
+        markOverlayStateDirty(true)
+        scheduleMapWork(0, true)
+    end)
+end)
+
 
 local function getSharedSetting(key, fallback)
     -- Use rawget so UE4SS does not throw "Global for __index doesn't exist" when ModRef is unavailable.
@@ -3570,7 +3668,7 @@ local function applyBasicModSettings()
     local changed = false
     local value = nil
 
-    value = getSharedSetting("LogLevel", Config.Debug.LogLevel or "Info")
+    value = SN2POILang.decodeOptionLabel("log_level", getSharedSetting("LogLevel", Config.Debug.LogLevel or "Info")) or (Config.Debug.LogLevel or "Info")
     if value == "Off" or value == "Error" or value == "Warning" or value == "Info" or value == "Verbose" then
         Config.Debug.LogLevel = value
     end
@@ -3591,7 +3689,7 @@ local function applyBasicModSettings()
         log("Setting applied: ShowMinimapAtStartup = " .. tostring(value), "Verbose")
     end
 
-    value = normalizeMinimapAnchor(getSharedSetting("MinimapAnchor", Config.Minimap.Anchor))
+    value = normalizeMinimapAnchor(SN2POILang.decodeOptionLabel("minimap_anchor", getSharedSetting("MinimapAnchor", Config.Minimap.Anchor)) or Config.Minimap.Anchor)
     if Config.Minimap.Anchor ~= value then
         Config.Minimap.Anchor = value
         changed = true
@@ -3653,7 +3751,7 @@ local function applyBasicModSettings()
         log("Setting applied: Marker.Size = " .. tostring(value), "Verbose")
     end
 
-    value = getSharedSetting("MarkerColorPreset", Config.Marker.ColorPreset or "Green")
+    value = SN2POILang.decodeOptionLabel("marker_color_preset", getSharedSetting("MarkerColorPreset", Config.Marker.ColorPreset or "Green")) or (Config.Marker.ColorPreset or "Green")
     if Config.Marker.ColorPreset ~= value then
         applyMarkerColorPreset(value)
         changed = true
