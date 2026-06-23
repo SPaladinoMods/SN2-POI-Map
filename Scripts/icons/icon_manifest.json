@@ -1,0 +1,125 @@
+{
+  "scale": 2.5,
+  "icons": [
+    {
+      "category_id": 15593,
+      "title": "Point of Interest",
+      "icon": "point_of_interest",
+      "file": "15593_point_of_interest.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15597,
+      "title": "Wreck",
+      "icon": "wreck",
+      "file": "15597_wreck.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15598,
+      "title": "Lifepod",
+      "icon": "lifepod",
+      "file": "15598_lifepod.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15599,
+      "title": "Abandoned Base",
+      "icon": "abandoned_base",
+      "file": "15599_abandoned_base.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15607,
+      "title": "Leviathan",
+      "icon": "leviathon",
+      "file": "15607_leviathan.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15610,
+      "title": "Fragment",
+      "icon": "fragment",
+      "file": "15610_fragment.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15611,
+      "title": "Data Box",
+      "icon": "data_box",
+      "file": "15611_data_box.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15614,
+      "title": "Equipment",
+      "icon": "equipment",
+      "file": "15614_equipment.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15617,
+      "title": "Electronics",
+      "icon": "electronics",
+      "file": "15617_electronics.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15620,
+      "title": "Data Terminal",
+      "icon": "data_terminal",
+      "file": "15620_data_terminal.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15622,
+      "title": "Easter Egg",
+      "icon": "easter_egg",
+      "file": "15622_easter_egg.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15623,
+      "title": "Databank Entry",
+      "icon": "databank_entry",
+      "file": "15623_databank_entry.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15624,
+      "title": "Adaptation",
+      "icon": "adaptation",
+      "file": "15624_adaptation.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15626,
+      "title": "Blackbox",
+      "icon": "black_box",
+      "file": "15626_blackbox.png",
+      "width": 82,
+      "height": 110
+    },
+    {
+      "category_id": 15663,
+      "title": "Supply Crate",
+      "icon": "supply_crate",
+      "file": "15663_supply_crate.png",
+      "width": 82,
+      "height": 110
+    }
+  ]
+}

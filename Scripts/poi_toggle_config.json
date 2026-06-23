@@ -1,0 +1,144 @@
+{
+  "name": "subnautica2_world_category_toggles",
+  "zoom": 14,
+  "scale": 2.5,
+  "overlay_dir": "category_layers",
+  "category_count": 15,
+  "categories": [
+    {
+      "category_id": 15593,
+      "title": "Point of Interest",
+      "icon": "point_of_interest",
+      "group_id": 2770,
+      "count": 14,
+      "file": "15593_point_of_interest.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15597,
+      "title": "Wreck",
+      "icon": "wreck",
+      "group_id": 2770,
+      "count": 12,
+      "file": "15597_wreck.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15598,
+      "title": "Lifepod",
+      "icon": "lifepod",
+      "group_id": 2770,
+      "count": 1,
+      "file": "15598_lifepod.png",
+      "default_enabled": true
+    },
+    {
+      "category_id": 15599,
+      "title": "Abandoned Base",
+      "icon": "abandoned_base",
+      "group_id": 2770,
+      "count": 12,
+      "file": "15599_abandoned_base.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15607,
+      "title": "Leviathan",
+      "icon": "leviathon",
+      "group_id": 2772,
+      "count": 5,
+      "file": "15607_leviathan.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15610,
+      "title": "Fragment",
+      "icon": "fragment",
+      "group_id": 2773,
+      "count": 101,
+      "file": "15610_fragment.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15611,
+      "title": "Data Box",
+      "icon": "data_box",
+      "group_id": 2773,
+      "count": 25,
+      "file": "15611_data_box.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15614,
+      "title": "Equipment",
+      "icon": "equipment",
+      "group_id": 2773,
+      "count": 6,
+      "file": "15614_equipment.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15617,
+      "title": "Electronics",
+      "icon": "electronics",
+      "group_id": 2773,
+      "count": 1,
+      "file": "15617_electronics.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15620,
+      "title": "Data Terminal",
+      "icon": "data_terminal",
+      "group_id": 2774,
+      "count": 6,
+      "file": "15620_data_terminal.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15622,
+      "title": "Easter Egg",
+      "icon": "easter_egg",
+      "group_id": 2775,
+      "count": 2,
+      "file": "15622_easter_egg.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15623,
+      "title": "Databank Entry",
+      "icon": "databank_entry",
+      "group_id": 2774,
+      "count": 48,
+      "file": "15623_databank_entry.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15624,
+      "title": "Adaptation",
+      "icon": "adaptation",
+      "group_id": 2773,
+      "count": 3,
+      "file": "15624_adaptation.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15626,
+      "title": "Blackbox",
+      "icon": "black_box",
+      "group_id": 2774,
+      "count": 33,
+      "file": "15626_blackbox.png",
+      "default_enabled": false
+    },
+    {
+      "category_id": 15663,
+      "title": "Supply Crate",
+      "icon": "supply_crate",
+      "group_id": 2773,
+      "count": 45,
+      "file": "15663_supply_crate.png",
+      "default_enabled": false
+    }
+  ]
+}

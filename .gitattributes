@@ -1,0 +1,10 @@
+* text=auto
+.gitattributes text eol=lf
+*.lua text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tga binary
+*.dat binary
